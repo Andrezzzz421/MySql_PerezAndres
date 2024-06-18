@@ -2,119 +2,120 @@
 -- ### DIA # 3 -  GESTION DE DATOS E INSERCIONES ###
 -- #####################
 
-Create database dia3;
+CREATE DATABASE dia3;
 
-use dia3;
+USE dia3;
 
--- tabla gama producto
+-- Tabla oficina
 
-create table gama_producto(
-	gama varchar(50)not null primary key,
-	descripcion_texto text,
-	descripcion_html text,
-	imagen varchar(256)
+CREATE TABLE oficina(
+	codigo_oficina VARCHAR(10) NOT NULL PRIMARY KEY,
+    ciudad VARCHAR(30) NOT NULL,
+    pais VARCHAR(50) NOT NULL,
+    region VARCHAR(50),
+    codigo_postal VARCHAR(10) NOT NULL,
+    telefono VARCHAR(20),
+    linea_direccion1 VARCHAR(50) NOT NULL,
+    linea_direccion2 VARCHAR(50)
 );
 
--- tabla producto
+-- Tabla empleado
 
-create table producto(
-    codigo_producto varchar(15)primary key,
-    nombre varchar(70) not null,
-    gama varchar(50) not null,
-    dimensiones varchar(25),
-    proveedor varchar(50),
-    descripcion text,
-    cantidad_en_stock smallint(6) not null,
-    precio_venta decimal(15,2) not null,
-    precio_proveedor decimal(15,2),
-    foreign key (gama) references gama_producto(gama)
+CREATE TABLE empleado(
+	codigo_empleado INT(11) PRIMARY KEY NOT NULL,
+    nombre VARCHAR(50) NOT NULL,
+    apellido1 VARCHAR(50) NOT NULL,
+    apellido2 VARCHAR(50),
+    extension VARCHAR(10) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    codigo_oficina VARCHAR(10) NOT NULL,
+    codigo_jefe INT(11),
+    puesto VARCHAR(50),
+    FOREIGN KEY (codigo_oficina) REFERENCES oficina(codigo_oficina)
 );
 
+-- Tabla cliente
 
--- tabla detalle pedido
-
-create table detalle_pedido(
-    codigo_pedido int(11) primary key,
-    codigo_producto varchar(15),
-    cantidad int(11) not null,
-    precio_unidad decimal(15,2),
-    numero_linea smallint(5),
-    foreign key (codigo_pedido) references pedido(codigo_pedido),
-    foreign key (codigo_producto) references producto(codigo_producto)
+CREATE TABLE cliente(
+	codigo_cliente INT(11) PRIMARY KEY,
+	nombre_cliente VARCHAR(50) NOT NULL,
+	nombre_contacto VARCHAR(30),
+	apellido_contacto VARCHAR(30),
+	telefono VARCHAR(15) NOT NULL,
+	fax VARCHAR(15),
+	linea_direccion1 VARCHAR(50) NOT NULL,
+	linea_direccion2 VARCHAR(50),
+	ciudad VARCHAR(50) NOT NULL,
+	region VARCHAR(50),
+	pais VARCHAR(50),
+	codigo_postal VARCHAR(10),
+	codigo_empleado_rep_ventas INT(11),
+	limite_credito DECIMAL(15,2),
+    FOREIGN KEY (codigo_empleado_rep_ventas) REFERENCES empleado(codigo_empleado)
 );
 
--- tabla cliente
+-- Tabla gama producto
 
-create table cliente(
-	codigo_cliente int(11) primary key,
-	nombre_cliente varchar(50)not null,
-	nombre_contacto varchar(30),
-	apellido_contacto varchar(30),
-	telefono varchar(15) not null,
-	fax varchar (15) not null,
-	linea_direccion1 varchar(50) not null,
-	linea_direccion2 varchar(50),
-	ciudad varchar(50) not null,
-	region varchar(50),
-	pais varchar(50),
-	codigo_postal varchar(10),
-	codigo_empleado_rep_ventas int(11),
-	limite_credito decimal(15,2),
-    foreign key (codigo_empleado_rep_ventas) references empleado(codigo_empleado)
+CREATE TABLE gama_producto(
+	gama VARCHAR(50) NOT NULL PRIMARY KEY,
+	descripcion_texto TEXT,
+	descripcion_html TEXT,
+	imagen VARCHAR(256)
 );
 
--- tabla empleado
+-- Tabla producto
 
-create table empleado(
-	codigo_empleado int(11) primary key not null,
-    nombre varchar(50) not null,
-    apellido1 varchar(50) not null,
-    apellido2 varchar(10),
-    extension varchar(10) not null,
-    email varchar(100) not null,
-    codigo_oficina varchar(10) not null,
-    codigo_jefe int(11),
-    puesto varchar(50),
-    foreign key (codigo_oficina) references oficina(codigo_oficina)
-); 
-
--- tabla oficina
-
-create table oficina(
-	codigo_oficina varchar(10) not null primary key,
-    ciudad varchar(30) not null,
-    pais varchar(50) not null,
-    region varchar(50),
-    codigo_postal varchar(10) not null,
-    telefono varchar(20),
-    linea_direccion1 varchar(50) not null,
-    linea_direccion2 varchar(50)
+CREATE TABLE producto(
+    codigo_producto VARCHAR(15) PRIMARY KEY,
+    nombre VARCHAR(70) NOT NULL,
+    gama VARCHAR(50) NOT NULL,
+    dimensiones VARCHAR(25),
+    proveedor VARCHAR(50),
+    descripcion TEXT,
+    cantidad_en_stock SMALLINT NOT NULL,
+    precio_venta DECIMAL(15,2) NOT NULL,
+    precio_proveedor DECIMAL(15,2),
+    FOREIGN KEY (gama) REFERENCES gama_producto(gama)
 );
 
--- tabla pago
+-- Tabla pedido
 
-create table pago(
-	codigo_cliente int(11) primary key ,
-	forma_pago varchar(40),
-	id_transanccio varchar(50) not null,
-	fecha_pago date,
-	total decimal(15,2),
-    foreign key (codigo_cliente) references cliente(codigo_cliente)
+CREATE TABLE pedido(
+	codigo_pedido INT(11) PRIMARY KEY,
+    fecha_pedido DATE NOT NULL,
+    fecha_esperada DATE NOT NULL,
+    fecha_entrega DATE,
+    estado VARCHAR(15) NOT NULL,
+    comentarios TEXT,
+    codigo_cliente INT(11) NOT NULL,
+    FOREIGN KEY (codigo_cliente) REFERENCES cliente(codigo_cliente)
 );
 
--- tabla pedido
+-- Tabla detalle pedido
 
-create table pedido(
-	codigo_pedido int(11)primary key,
-    fecha_pedido date not null,
-    fehca_esperada date not null,
-    fecha_entrega date,
-    estado varchar(15) not null,
-    comentarios text,
-    codigo_cliente int(11) not null,
-    foreign key(codigo_cliente) references cliente(codigo_cliente)
+CREATE TABLE detalle_pedido(
+    codigo_pedido INT(11),
+    codigo_producto VARCHAR(15),
+    cantidad INT(11) NOT NULL,
+    precio_unidad DECIMAL(15,2),
+    numero_linea SMALLINT(5),
+    PRIMARY KEY (codigo_pedido, codigo_producto, numero_linea),
+    FOREIGN KEY (codigo_pedido) REFERENCES pedido(codigo_pedido),
+    FOREIGN KEY (codigo_producto) REFERENCES producto(codigo_producto)
 );
 
-show tables;
+-- Tabla pago
+
+CREATE TABLE pago(
+	codigo_cliente INT(11),
+	forma_pago VARCHAR(40),
+	id_transaccion VARCHAR(50) NOT NULL,
+	fecha_pago DATE,
+	total DECIMAL(15,2),
+    PRIMARY KEY (codigo_cliente, id_transaccion),
+    FOREIGN KEY (codigo_cliente) REFERENCES cliente(codigo_cliente)
+);
+
+SHOW TABLES;
 
 -- Desarrollado por Andres Perez / ID.1065593359
